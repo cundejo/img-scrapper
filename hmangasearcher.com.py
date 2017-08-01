@@ -1,15 +1,15 @@
-'''
-Scarping links from http://www.hmangasearcher.com/list/{page}/{lenght}
-
-'''
+"""
+Created by Oliver Sosa<oliver@devisfunny.com> on 31/07/17.
+Scraping links from http://www.hmangasearcher.com/list/{page}/{lenght}
+"""
 
 import os
 import urllib
 from urllib2 import urlopen, unquote, HTTPError
 from urlparse import urljoin, urlparse
-from slugify import slugify
 
 from bs4 import BeautifulSoup
+from slugify import slugify
 
 INITIAL_URL = 'http://www.hmangasearcher.com/list/1/100'
 
@@ -21,7 +21,17 @@ visited_urls = []
 
 
 def make_soup(url):
+    # url = urllib.unquote(url)  #delete
     try:
+        url = urllib.quote(url)
+    except KeyError:
+        print 'Error encoding the url ' + url
+        return None
+
+    url = url.replace('http%3A//', 'http://', 1)
+
+    try:
+        print 'Opening url ' + url
         html = urlopen(url).read()
         return BeautifulSoup(html, "html.parser")
     except HTTPError:
@@ -71,14 +81,20 @@ def save_images(first_img, pages):
         os.makedirs(path)
     except OSError:
         print 'Comic already exist: ' + path
-        return
+        local_pages = len([name for name in os.listdir(path) if os.path.isfile(os.path.join(path, name))])
+        if local_pages == int(pages):
+            print "And has all the pages"
+            return
+        else:
+            print "Fuck, some pages missing! Recovering..."
 
-    for page in range(1, int(pages)):
+    for page in range(1, int(pages)+1):
         image_url = first_img_url_parsed.scheme + '://' + first_img_url_parsed.netloc + url_path + '/' + str(
             page) + '.jpg'
         filename = path + '/' + str(page) + '.jpg'
-        print 'Saving ' + filename
-        urllib.urlretrieve(image_url, filename)
+        if not os.path.exists(filename):
+            print 'Saving ' + filename
+            urllib.urlretrieve(image_url, filename)
 
 
 def run():
@@ -95,7 +111,8 @@ def run():
 
 run()
 #
-# a = get_image_and_pages('http://www.hmangasearcher.com/c/34-year-old%20Begging%20Wife/10')
+# a = get_image_and_pages('http://www.hmangasearcher.com/c/34-year-old%20Begging%20Wife/5')
+# a = get_image_and_pages('http://libs.loc/a%E2%88%9E%40%23%24%25%5E%26%2A%28%5E/aa.html')
 # # b = get_image_and_pages('http://www.hmangasearcher.com/c/34-year-old%20Begging%20Wife/5')
 # # c = get_image_and_pages('http://www.hmangasearcher.com/c/3%20Angels%20Short%20-%20Episode%201%20-%20Original%20Work/1')
 #

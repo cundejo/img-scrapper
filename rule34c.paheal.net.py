@@ -1,3 +1,8 @@
+"""
+Created by Oliver Sosa<oliver@devisfunny.com> on 31/07/17.
+Scraping links from http://rule34c.paheal.net/books/
+"""
+
 import os
 import urllib
 from urllib2 import urlopen
